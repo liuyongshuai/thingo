@@ -7,14 +7,14 @@ package router
 
 import (
 	"fmt"
-	"github.com/liuyongshuai/goUtils"
+	"github.com/liuyongshuai/negoutils/comutils"
 	"github.com/liuyongshuai/thingo/context"
 	"regexp"
 	"strings"
 )
 
 //路由解析函数
-type RouterMatchFunc func(*context.RuntofuContext, string, *RuntofuRouterItem) *RuntofuRouterItem
+type RouterMatchFunc func(*context.ThingoContext, string, *RuntofuRouterItem) *RuntofuRouterItem
 
 /**
 匹配全路径路由
@@ -29,7 +29,7 @@ type RouterMatchFunc func(*context.RuntofuContext, string, *RuntofuRouterItem) *
 	/ggtest/abc
 	/ggtest/44444
 */
-func matchPathInfoRouter(ctx *context.RuntofuContext, uri string, rt *RuntofuRouterItem) *RuntofuRouterItem {
+func matchPathInfoRouter(ctx *context.ThingoContext, uri string, rt *RuntofuRouterItem) *RuntofuRouterItem {
 	//请求的URL的切片
 	pathinfo := strings.Split(uri, "/")
 	//事先配置好的路由的切片，要和URL逐个比对，若有:arg、:arg:这样的还要替换
@@ -42,7 +42,7 @@ func matchPathInfoRouter(ctx *context.RuntofuContext, uri string, rt *RuntofuRou
 		if strings.HasPrefix(val, ":") {
 			if len(pathinfo) > key {
 				//非数字必须  :arg:，数字只能 :arg
-				if !goUtils.IsAllNumber(pathinfo[key]) && !strings.HasSuffix(val, ":") {
+				if !comutils.IsAllNumber(pathinfo[key]) && !strings.HasSuffix(val, ":") {
 					return nil
 				}
 				//提取匹配上的参数名和参数值，并回填到Input对象里去
@@ -62,7 +62,7 @@ func matchPathInfoRouter(ctx *context.RuntofuContext, uri string, rt *RuntofuRou
 config 为 `^ggtest/aid(\w+?)/cid(\d+)$`，Param 为 aid=$1&cid=$2
 则将请求中aid后面的字符串挑出来赋给aid，cid后面的字符串挑出来赋给cid
 */
-func matchRegexpRouter(ctx *context.RuntofuContext, uri string, rt *RuntofuRouterItem) *RuntofuRouterItem {
+func matchRegexpRouter(ctx *context.ThingoContext, uri string, rt *RuntofuRouterItem) *RuntofuRouterItem {
 	//先判断请求的URLj否匹配给定的正则表达式
 	match, err := regexp.MatchString(rt.Config, uri)
 	if err != nil || !match {

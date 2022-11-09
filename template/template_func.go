@@ -5,6 +5,7 @@ package template
 
 import (
 	"encoding/json"
+	"github.com/liuyongshuai/negoutils/convertutils"
 	"html/template"
 	"reflect"
 	"strings"
@@ -13,7 +14,7 @@ import (
 
 //常用的模板函数
 var CommonTplFuncs = map[string]interface{}{
-	"substr":                  Substr,
+	"substr":                  TplFuncSubStr,
 	"htmlspecialchars":        TplFuncHtmlSpecialChars,
 	"htmlspecialchars_decode": TplFuncHtmlSpecialcharsDecode,
 	"json_encode":             TplFuncJsonEncode,
@@ -128,6 +129,26 @@ func TplFuncStr2Html(raw string) template.HTML {
 	return template.HTML(raw)
 }
 
+//截取字符串
+func TplFuncSubStr(str string, start int, end int) string {
+	rs := []rune(str)
+	length := len(rs)
+	if start < 0 {
+		start += length
+	} else if start > length {
+		start = start % length
+	}
+	if end < 0 {
+		end += length
+	} else if end > length {
+		end = end % length
+	}
+	if start > end || end < 0 || start < 0 {
+		return ""
+	}
+	return string(rs[start : end+1])
+}
+
 //日期格式化
 func TplFuncDateFormat(t time.Time, layout string) template.HTML {
 	return template.HTML(t.Format(layout))
@@ -151,38 +172,38 @@ func TplFuncDate(timestamp int64, format string) template.HTML {
 //相等
 func TplFuncEQ(arg1 interface{}, arg2 ...interface{}) (bool, error) {
 	v1 := reflect.ValueOf(arg1)
-	k1, err := GetBasicKind(v1)
+	k1, err := convertutils.GetBasicKind(v1)
 	if err != nil {
 		return false, err
 	}
 	if len(arg2) == 0 {
-		return false, ErrorNoComparison
+		return false, convertutils.ErrorNoComparison
 	}
 	for _, arg := range arg2 {
 		v2 := reflect.ValueOf(arg)
-		k2, err := GetBasicKind(v2)
+		k2, err := convertutils.GetBasicKind(v2)
 		if err != nil {
 			return false, err
 		}
 		if k1 != k2 {
-			return false, ErrorBadComparison
+			return false, convertutils.ErrorBadComparison
 		}
 		truth := false
 		switch k1 {
-		case BoolKind:
+		case convertutils.BoolKind:
 			truth = v1.Bool() == v2.Bool()
-		case ComplexKind:
+		case convertutils.ComplexKind:
 			truth = v1.Complex() == v2.Complex()
-		case FloatKind:
+		case convertutils.FloatKind:
 			truth = v1.Float() == v2.Float()
-		case IntKind:
+		case convertutils.IntKind:
 			truth = v1.Int() == v2.Int()
-		case StringKind:
+		case convertutils.StringKind:
 			truth = v1.String() == v2.String()
-		case UintKind:
+		case convertutils.UintKind:
 			truth = v1.Uint() == v2.Uint()
 		default:
-			return false, ErrorInvalidInputType
+			return false, convertutils.ErrorInvalidInputType
 		}
 		if truth {
 			return true, nil
@@ -194,32 +215,32 @@ func TplFuncEQ(arg1 interface{}, arg2 ...interface{}) (bool, error) {
 //小于
 func TplFuncLT(arg1, arg2 interface{}) (bool, error) {
 	v1 := reflect.ValueOf(arg1)
-	k1, err := GetBasicKind(v1)
+	k1, err := convertutils.GetBasicKind(v1)
 	if err != nil {
 		return false, err
 	}
 	v2 := reflect.ValueOf(arg2)
-	k2, err := GetBasicKind(v2)
+	k2, err := convertutils.GetBasicKind(v2)
 	if err != nil {
 		return false, err
 	}
 	if k1 != k2 {
-		return false, ErrorBadComparison
+		return false, convertutils.ErrorBadComparison
 	}
 	truth := false
 	switch k1 {
-	case BoolKind, ComplexKind:
-		return false, ErrorBadComparisonType
-	case FloatKind:
+	case convertutils.BoolKind, convertutils.ComplexKind:
+		return false, convertutils.ErrorBadComparisonType
+	case convertutils.FloatKind:
 		truth = v1.Float() < v2.Float()
-	case IntKind:
+	case convertutils.IntKind:
 		truth = v1.Int() < v2.Int()
-	case StringKind:
+	case convertutils.StringKind:
 		truth = v1.String() < v2.String()
-	case UintKind:
+	case convertutils.UintKind:
 		truth = v1.Uint() < v2.Uint()
 	default:
-		return false, ErrorInvalidInputType
+		return false, convertutils.ErrorInvalidInputType
 	}
 	return truth, nil
 }

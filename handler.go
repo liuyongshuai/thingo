@@ -1,10 +1,10 @@
 package goweb
 
 import (
-	"github.com/liuyongshuai/goUtils"
 	"github.com/liuyongshuai/thingo/context"
 	"github.com/liuyongshuai/thingo/controller"
 	"github.com/liuyongshuai/thingo/router"
+	"github.com/liuyongshuai/thingo/template"
 	"net/http"
 	"reflect"
 	"sync"
@@ -17,10 +17,10 @@ const (
 )
 
 //插件函数
-type HooksFunc func(ctx *context.RuntofuContext)
+type HooksFunc func(ctx *context.ThingoContext)
 
 //panic后的处理函数
-type RecoverFunc func(*context.RuntofuContext)
+type RecoverFunc func(*context.ThingoContext)
 
 //控制器注册器
 type RuntofuHandler struct {
@@ -28,7 +28,7 @@ type RuntofuHandler struct {
 	Router        *router.RuntofuRouterList             //路由列表
 	RecoverFunc   RecoverFunc                           //panic后的处理函数
 	pool          sync.Pool                             //context上下文池
-	Tpl           *goUtils.TplBuilder                   //模板对象类型
+	Tpl           *template.TplBuilder                  //模板对象类型
 	TplExt        string                                //模板的扩展后缀，默认“tpl”
 	TplDir        string                                //模板的根目录，默认“./tpl/”
 	TplCommonData map[interface{}]interface{}           //模板的公共参数
@@ -41,7 +41,7 @@ func NewRuntofuHandler() *RuntofuHandler {
 	cr := &RuntofuHandler{
 		Hooks:         make(map[int][]HooksFunc),
 		MaxMemory:     64 << 20,
-		Tpl:           goUtils.NewTplBuilder(),
+		Tpl:           template.NewTplBuilder(),
 		TplExt:        "tpl",
 		TplDir:        "./tpl",
 		Router:        router.NewRuntofuRouterList(),
@@ -50,7 +50,7 @@ func NewRuntofuHandler() *RuntofuHandler {
 	cr.Hooks[HooksBeforeRun] = []HooksFunc{}
 	cr.Hooks[HooksAfterRun] = []HooksFunc{}
 	cr.pool.New = func() interface{} {
-		return context.NewRuntofuContext()
+		return context.NewThingoContext()
 	}
 	return cr
 }
@@ -120,7 +120,7 @@ func (cr *RuntofuHandler) SetErrController(c controller.RuntofuControllerInterfa
 //执行 http.Handler 接口
 func (cr *RuntofuHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	//从池子里提取上下文实例
-	ctx := cr.pool.Get().(*context.RuntofuContext)
+	ctx := cr.pool.Get().(*context.ThingoContext)
 	if ctx == nil {
 		panic("get context failed")
 	}

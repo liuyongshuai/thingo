@@ -22,7 +22,7 @@ func init() {
 func NewThingoContext() *ThingoContext {
 	RuntofuCtx := &ThingoContext{
 		Input:  NewThingoInput(),
-		Output: NewOutput(),
+		Output: NewThingoOutput(),
 	}
 	RuntofuCtx.Output.Context = RuntofuCtx
 	RuntofuCtx.Input.Context = RuntofuCtx

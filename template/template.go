@@ -6,6 +6,7 @@ package template
 
 import (
 	"fmt"
+	"github.com/liuyongshuai/negoutils/fileutils"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -155,9 +156,8 @@ func (tb *TplBuilder) getAllTplFiles(tplDir ...string) error {
 	}
 	//要读取的目录
 	dir := strings.TrimRight(rootDir, pathSep)
-	ftool := NewFileTool()
 	//读取所有的文件
-	tplFileList, err := ftool.ReadDirFiles(dir)
+	tplFileList, err := fileutils.ReadDirFiles(dir)
 	if err != nil {
 		return err
 	}

@@ -3,8 +3,9 @@ package controller
 import (
 	"bytes"
 	"fmt"
-	"github.com/liuyongshuai/goUtils"
+	"github.com/liuyongshuai/negoutils/convertutils"
 	"github.com/liuyongshuai/thingo/context"
+	"github.com/liuyongshuai/thingo/template"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 )
 
 type RuntofuControllerInterface interface {
-	Init(ct *context.RuntofuContext, app interface{}, tpl *goUtils.TplBuilder, tplInitData map[interface{}]interface{})
+	Init(ct *context.ThingoContext, app interface{}, tpl *template.TplBuilder, tplInitData map[interface{}]interface{})
 	Prepare() error //做一些预处理工作，如登录校验、提取用户信息等
 	Run()           //正儿八经的业务逻辑处理
 	Finish()        //结束时的清理工作，一般不用实现
@@ -21,9 +22,9 @@ type RuntofuControllerInterface interface {
 
 //控制层基类
 type RuntofuController struct {
-	Ctx           *context.RuntofuContext
+	Ctx           *context.ThingoContext
 	AppController interface{}
-	Tpl           *goUtils.TplBuilder         //模板对象类型
+	Tpl           *template.TplBuilder        //模板对象类型
 	TplData       map[interface{}]interface{} //赋给tpl模板的变量
 	TplName       string                      //模板名称，如“index.tpl”
 	TplSections   map[string]string           //页面上各个块
@@ -35,7 +36,7 @@ type RuntofuController struct {
 初始化相关操作，自动执行，一般不用
 **********************************************
 */
-func (c *RuntofuController) Init(ctx *context.RuntofuContext, app interface{}, tpl *goUtils.TplBuilder, tplInitData map[interface{}]interface{}) {
+func (c *RuntofuController) Init(ctx *context.ThingoContext, app interface{}, tpl *template.TplBuilder, tplInitData map[interface{}]interface{}) {
 	c.Ctx = ctx
 	c.AppController = app
 	c.Tpl = tpl
@@ -144,14 +145,14 @@ func (c *RuntofuController) FormParam() url.Values {
 }
 
 //提取参数
-func (c *RuntofuController) GetParam(key string, defaultVal ...interface{}) goUtils.ElemType {
+func (c *RuntofuController) GetParam(key string, defaultVal ...interface{}) convertutils.ElemType {
 	if v := c.Ctx.Input.Query(key); v != "" {
-		return goUtils.MakeElemType(v)
+		return convertutils.MakeElemType(v)
 	}
 	if len(defaultVal) > 0 {
-		return goUtils.MakeElemType(defaultVal[0])
+		return convertutils.MakeElemType(defaultVal[0])
 	}
-	return goUtils.MakeElemType("")
+	return convertutils.MakeElemType("")
 }
 
 //获取上传文件

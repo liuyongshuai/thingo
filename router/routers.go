@@ -67,7 +67,7 @@ func (rs *RuntofuRouterList) AddRouters(r ...*RuntofuRouterItem) *RuntofuRouterL
 }
 
 //开始匹配路由
-func (rs *RuntofuRouterList) Match(ctx *context.RuntofuContext, req *http.Request) *RuntofuRouterItem {
+func (rs *RuntofuRouterList) Match(ctx *context.ThingoContext, req *http.Request) *RuntofuRouterItem {
 	if len(rs.RList) == 0 {
 		return nil
 	}
