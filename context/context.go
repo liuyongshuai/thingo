@@ -20,13 +20,13 @@ func init() {
 
 //返回请求上下文
 func NewThingoContext() *ThingoContext {
-	RuntofuCtx := &ThingoContext{
+	ThingoCtx := &ThingoContext{
 		Input:  NewThingoInput(),
 		Output: NewThingoOutput(),
 	}
-	RuntofuCtx.Output.Context = RuntofuCtx
-	RuntofuCtx.Input.Context = RuntofuCtx
-	return RuntofuCtx
+	ThingoCtx.Output.Context = ThingoCtx
+	ThingoCtx.Input.Context = ThingoCtx
+	return ThingoCtx
 }
 
 //上下文的定义
@@ -39,11 +39,11 @@ type ThingoContext struct {
 }
 
 //重置本次请求的上下文
-func (RuntofuCtx *ThingoContext) Reset(rw *http.ResponseWriter, r *http.Request) {
-	RuntofuCtx.Request = r
-	RuntofuCtx.ResponseWriter = *rw
-	RuntofuCtx.Input.Reset(RuntofuCtx)
-	RuntofuCtx.Output.Reset(RuntofuCtx)
+func (ThingoCtx *ThingoContext) Reset(rw *http.ResponseWriter, r *http.Request) {
+	ThingoCtx.Request = r
+	ThingoCtx.ResponseWriter = *rw
+	ThingoCtx.Input.Reset(ThingoCtx)
+	ThingoCtx.Output.Reset(ThingoCtx)
 	var nextId int64 = 0
 	var err error
 	for {
@@ -52,28 +52,28 @@ func (RuntofuCtx *ThingoContext) Reset(rw *http.ResponseWriter, r *http.Request)
 			break
 		}
 	}
-	RuntofuCtx.UniqueKey = fmt.Sprintf("%x", nextId)
+	ThingoCtx.UniqueKey = fmt.Sprintf("%x", nextId)
 }
 
 //跳转，状态码可选，默认301
-func (RuntofuCtx *ThingoContext) Redirect(locationUrl string, status ...int) {
+func (ThingoCtx *ThingoContext) Redirect(locationUrl string, status ...int) {
 	code := http.StatusTemporaryRedirect
 	if len(status) > 0 {
 		code = status[0]
 	}
-	http.Redirect(RuntofuCtx.ResponseWriter, RuntofuCtx.Request, locationUrl, code)
+	http.Redirect(ThingoCtx.ResponseWriter, ThingoCtx.Request, locationUrl, code)
 }
 
 //刷新返回数据
-func (RuntofuCtx *ThingoContext) Flush() {
-	if f, ok := RuntofuCtx.ResponseWriter.(http.Flusher); ok {
+func (ThingoCtx *ThingoContext) Flush() {
+	if f, ok := ThingoCtx.ResponseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
 }
 
 //当客户端取消请求或连接断开时用
-func (RuntofuCtx *ThingoContext) CloseNotify() <-chan bool {
-	if cn, ok := RuntofuCtx.ResponseWriter.(http.CloseNotifier); ok {
+func (ThingoCtx *ThingoContext) CloseNotify() <-chan bool {
+	if cn, ok := ThingoCtx.ResponseWriter.(http.CloseNotifier); ok {
 		return cn.CloseNotify()
 	}
 	return nil

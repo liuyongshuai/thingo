@@ -37,9 +37,9 @@ func (output *ThingoOuput) Reset(ctx *ThingoContext) {
 
 	//默认添加的几个公共头信息
 	output.AddHeader("Referrer-Policy", "origin-when-cross-origin") //默认的referrer策略
-	output.AddHeader("X-Powered-By", "RuntofuGo")
-	output.AddHeader("Server", "RuntofuGo")
-	output.AddHeader("Github", "https://github.com/liuyongshuai/Runtofugo")
+	output.AddHeader("X-Powered-By", "ThingoGo")
+	output.AddHeader("Server", "ThingoGo")
+	output.AddHeader("Github", "https://github.com/liuyongshuai/Thingogo")
 	output.AddHeader("Cache-Control", "no-cache, must-revalidate")
 	output.AddHeader("Expires", "0")
 }

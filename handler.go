@@ -23,28 +23,28 @@ type HooksFunc func(ctx *context.ThingoContext)
 type RecoverFunc func(*context.ThingoContext)
 
 //控制器注册器
-type RuntofuHandler struct {
-	Hooks         map[int][]HooksFunc                   //所有的插件列表
-	Router        *router.RuntofuRouterList             //路由列表
-	RecoverFunc   RecoverFunc                           //panic后的处理函数
-	pool          sync.Pool                             //context上下文池
-	Tpl           *template.TplBuilder                  //模板对象类型
-	TplExt        string                                //模板的扩展后缀，默认“tpl”
-	TplDir        string                                //模板的根目录，默认“./tpl/”
-	TplCommonData map[interface{}]interface{}           //模板的公共参数
-	Port          string                                //监听的端口
-	MaxMemory     int64                                 //POST时的最大内存
-	ErrController controller.RuntofuControllerInterface //当匹配不上时的错误信息页面
+type ThingoHandler struct {
+	Hooks         map[int][]HooksFunc                  //所有的插件列表
+	Router        *router.ThingoRouterList             //路由列表
+	RecoverFunc   RecoverFunc                          //panic后的处理函数
+	pool          sync.Pool                            //context上下文池
+	Tpl           *template.TplBuilder                 //模板对象类型
+	TplExt        string                               //模板的扩展后缀，默认“tpl”
+	TplDir        string                               //模板的根目录，默认“./tpl/”
+	TplCommonData map[interface{}]interface{}          //模板的公共参数
+	Port          string                               //监听的端口
+	MaxMemory     int64                                //POST时的最大内存
+	ErrController controller.ThingoControllerInterface //当匹配不上时的错误信息页面
 }
 
-func NewRuntofuHandler() *RuntofuHandler {
-	cr := &RuntofuHandler{
+func NewThingoHandler() *ThingoHandler {
+	cr := &ThingoHandler{
 		Hooks:         make(map[int][]HooksFunc),
 		MaxMemory:     64 << 20,
 		Tpl:           template.NewTplBuilder(),
 		TplExt:        "tpl",
 		TplDir:        "./tpl",
-		Router:        router.NewRuntofuRouterList(),
+		Router:        router.NewThingoRouterList(),
 		TplCommonData: make(map[interface{}]interface{}),
 	}
 	cr.Hooks[HooksBeforeRun] = []HooksFunc{}
@@ -56,12 +56,12 @@ func NewRuntofuHandler() *RuntofuHandler {
 }
 
 //设置监听端口
-func (cr *RuntofuHandler) SetPort(port string) {
+func (cr *ThingoHandler) SetPort(port string) {
 	cr.Port = port
 }
 
 //添加一个插件
-func (cr *RuntofuHandler) AddHooks(when int, hk HooksFunc) {
+func (cr *ThingoHandler) AddHooks(when int, hk HooksFunc) {
 	plist, ok := cr.Hooks[when]
 	if !ok {
 		return
@@ -71,54 +71,54 @@ func (cr *RuntofuHandler) AddHooks(when int, hk HooksFunc) {
 }
 
 //设置模板路径
-func (cr *RuntofuHandler) SetTplDir(dir string) {
+func (cr *ThingoHandler) SetTplDir(dir string) {
 	cr.TplDir = dir
 }
 
 //设置模板扩展名称
-func (cr *RuntofuHandler) SetTplExt(ext string) {
+func (cr *ThingoHandler) SetTplExt(ext string) {
 	cr.TplExt = ext
 }
 
 //设置给模板的公共参数
-func (cr *RuntofuHandler) SetTplCommonData(data map[interface{}]interface{}) {
+func (cr *ThingoHandler) SetTplCommonData(data map[interface{}]interface{}) {
 	for k, v := range data {
 		cr.TplCommonData[k] = v
 	}
 }
 
 //设置给模板的公共参数
-func (cr *RuntofuHandler) AddTplCommonData(k interface{}, v interface{}) {
+func (cr *ThingoHandler) AddTplCommonData(k interface{}, v interface{}) {
 	cr.TplCommonData[k] = v
 }
 
 //添加一个路由
-func (cr *RuntofuHandler) AddRouter(r *router.RuntofuRouterItem) {
+func (cr *ThingoHandler) AddRouter(r *router.ThingoRouterItem) {
 	cr.Router.AddRouter(r)
 }
 
 //批量添加路由
-func (cr *RuntofuHandler) AddRouters(rs ...*router.RuntofuRouterItem) {
+func (cr *ThingoHandler) AddRouters(rs ...*router.ThingoRouterItem) {
 	cr.Router.AddRouters(rs...)
 }
 
 //设置发生错误时的处理函数
-func (cr *RuntofuHandler) SetRecoverFunc(fn RecoverFunc) {
+func (cr *ThingoHandler) SetRecoverFunc(fn RecoverFunc) {
 	cr.RecoverFunc = fn
 }
 
 //设置POST最大内存
-func (cr *RuntofuHandler) SetMaxMemory(n int64) {
+func (cr *ThingoHandler) SetMaxMemory(n int64) {
 	cr.MaxMemory = n
 }
 
 //设置错误信息提示
-func (cr *RuntofuHandler) SetErrController(c controller.RuntofuControllerInterface) {
+func (cr *ThingoHandler) SetErrController(c controller.ThingoControllerInterface) {
 	cr.ErrController = c
 }
 
 //执行 http.Handler 接口
-func (cr *RuntofuHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (cr *ThingoHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	//从池子里提取上下文实例
 	ctx := cr.pool.Get().(*context.ThingoContext)
 	if ctx == nil {
@@ -138,7 +138,7 @@ func (cr *RuntofuHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	//控制层的类
-	var controllerIface controller.RuntofuControllerInterface
+	var controllerIface controller.ThingoControllerInterface
 	var ok bool
 
 	//开始匹配路由
@@ -148,14 +148,14 @@ func (cr *RuntofuHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		reflectVal := reflect.ValueOf(cr.ErrController)
 		ct := reflect.Indirect(reflectVal).Type()
 		vc := reflect.New(ct)
-		controllerIface, ok = vc.Interface().(controller.RuntofuControllerInterface)
+		controllerIface, ok = vc.Interface().(controller.ThingoControllerInterface)
 		if !ok {
 			panic("invalid controller")
 		}
 	} else {
 		//实例化一个控制层对象
 		vc := reflect.New(routerItem.ControllerType)
-		controllerIface, ok = vc.Interface().(controller.RuntofuControllerInterface)
+		controllerIface, ok = vc.Interface().(controller.ThingoControllerInterface)
 		if !ok {
 			panic("invalid controller")
 		}

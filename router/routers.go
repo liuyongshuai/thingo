@@ -15,9 +15,9 @@ import (
 )
 
 //返回一个路由列表信息
-func NewRuntofuRouterList() *RuntofuRouterList {
-	ret := &RuntofuRouterList{
-		RCache: make(map[string]RuntofuRouterCache),
+func NewThingoRouterList() *ThingoRouterList {
+	ret := &ThingoRouterList{
+		RCache: make(map[string]ThingoRouterCache),
 		MFunc:  make(map[int]RouterMatchFunc),
 		Mutex:  new(sync.RWMutex),
 	}
@@ -27,21 +27,21 @@ func NewRuntofuRouterList() *RuntofuRouterList {
 }
 
 //一堆路由列表，带缓存
-type RuntofuRouterList struct {
-	RList  []*RuntofuRouterItem          //所有的路由列表信息
-	RCache map[string]RuntofuRouterCache //已经匹配过的缓存起来
-	MFunc  map[int]RouterMatchFunc       //各种类型的处理函数
+type ThingoRouterList struct {
+	RList  []*ThingoRouterItem          //所有的路由列表信息
+	RCache map[string]ThingoRouterCache //已经匹配过的缓存起来
+	MFunc  map[int]RouterMatchFunc      //各种类型的处理函数
 	Mutex  *sync.RWMutex
 }
 
 //添加处理函数
-func (rs *RuntofuRouterList) AddMatchFunc(t int, fn RouterMatchFunc) *RuntofuRouterList {
+func (rs *ThingoRouterList) AddMatchFunc(t int, fn RouterMatchFunc) *ThingoRouterList {
 	rs.MFunc[t] = fn
 	return rs
 }
 
 //添加路由信息
-func (rs *RuntofuRouterList) AddRouter(r *RuntofuRouterItem) *RuntofuRouterList {
+func (rs *ThingoRouterList) AddRouter(r *ThingoRouterItem) *ThingoRouterList {
 	if r == nil {
 		return rs
 	}
@@ -52,7 +52,7 @@ func (rs *RuntofuRouterList) AddRouter(r *RuntofuRouterItem) *RuntofuRouterList 
 }
 
 //批量添加路由信息
-func (rs *RuntofuRouterList) AddRouters(r ...*RuntofuRouterItem) *RuntofuRouterList {
+func (rs *ThingoRouterList) AddRouters(r ...*ThingoRouterItem) *ThingoRouterList {
 	if len(r) <= 0 {
 		return rs
 	}
@@ -67,7 +67,7 @@ func (rs *RuntofuRouterList) AddRouters(r ...*RuntofuRouterItem) *RuntofuRouterL
 }
 
 //开始匹配路由
-func (rs *RuntofuRouterList) Match(ctx *context.ThingoContext, req *http.Request) *RuntofuRouterItem {
+func (rs *ThingoRouterList) Match(ctx *context.ThingoContext, req *http.Request) *ThingoRouterItem {
 	if len(rs.RList) == 0 {
 		return nil
 	}
@@ -99,12 +99,12 @@ func (rs *RuntofuRouterList) Match(ctx *context.ThingoContext, req *http.Request
 	//开始匹配路由信息
 	rs.Mutex.Lock()
 	defer rs.Mutex.Unlock()
-	var router *RuntofuRouterItem = nil
+	var router *ThingoRouterItem = nil
 	for _, rinfo := range rs.RList {
 		if fn, ok := rs.MFunc[rinfo.Type]; ok {
 			router = fn(ctx, path, rinfo)
 			if router != nil {
-				rs.RCache[path] = RuntofuRouterCache{F: fn, R: router}
+				rs.RCache[path] = ThingoRouterCache{F: fn, R: router}
 				return router
 			}
 		}
