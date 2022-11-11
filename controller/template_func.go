@@ -1,7 +1,7 @@
 // @author      Liu Yongshuai<liuyongshuai@hotmail.com>
 // @date        2018-11-29 14:37
 
-package template
+package controller
 
 import (
 	"encoding/json"

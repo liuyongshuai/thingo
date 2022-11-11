@@ -2,7 +2,7 @@
 // @author      Liu Yongshuai<liuyongshuai@hotmail.com>
 // @date        2018-11-29 11:59
 
-package template
+package controller
 
 import (
 	"fmt"

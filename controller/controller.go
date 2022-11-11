@@ -1,3 +1,7 @@
+// controller.go
+// @author      Liu Yongshuai<liuyongshuai@hotmail.com>
+// @date        2018-11-29 11:59
+
 package controller
 
 import (
@@ -5,7 +9,6 @@ import (
 	"fmt"
 	"github.com/liuyongshuai/negoutils/convertutils"
 	"github.com/liuyongshuai/thingo/context"
-	"github.com/liuyongshuai/thingo/template"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,7 +17,7 @@ import (
 )
 
 type ThingoControllerInterface interface {
-	Init(ct *context.ThingoContext, app interface{}, tpl *template.TplBuilder, tplInitData map[interface{}]interface{})
+	Init(ct *context.ThingoContext, app interface{}, tpl *TplBuilder, tplInitData map[interface{}]interface{})
 	Prepare() error //做一些预处理工作，如登录校验、提取用户信息等
 	Run()           //正儿八经的业务逻辑处理
 	Finish()        //结束时的清理工作，一般不用实现
@@ -24,7 +27,7 @@ type ThingoControllerInterface interface {
 type ThingoController struct {
 	Ctx           *context.ThingoContext
 	AppController interface{}
-	Tpl           *template.TplBuilder        //模板对象类型
+	Tpl           *TplBuilder                 //模板对象类型
 	TplData       map[interface{}]interface{} //赋给tpl模板的变量
 	TplName       string                      //模板名称，如“index.tpl”
 	TplSections   map[string]string           //页面上各个块
@@ -36,7 +39,7 @@ type ThingoController struct {
 初始化相关操作，自动执行，一般不用
 **********************************************
 */
-func (c *ThingoController) Init(ctx *context.ThingoContext, app interface{}, tpl *template.TplBuilder, tplInitData map[interface{}]interface{}) {
+func (c *ThingoController) Init(ctx *context.ThingoContext, app interface{}, tpl *TplBuilder, tplInitData map[interface{}]interface{}) {
 	c.Ctx = ctx
 	c.AppController = app
 	c.Tpl = tpl
