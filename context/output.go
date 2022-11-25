@@ -78,9 +78,7 @@ func (output *ThingoOuput) AddCookie(name string, value string, others ...interf
 
 		switch {
 		case maxAge > 0:
-			fmt.Fprintf(&b, "; Expires=%s; Max-Age=%d",
-				time.Now().Add(time.Duration(maxAge)*time.Second).UTC().Format(time.RFC1123),
-				maxAge)
+			fmt.Fprintf(&b, "; Expires=%s; Max-Age=%d", time.Now().Add(time.Duration(maxAge)*time.Second).UTC().Format(time.RFC1123), maxAge)
 		case maxAge < 0:
 			fmt.Fprintf(&b, "; Max-Age=0")
 		}
