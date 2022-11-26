@@ -4,7 +4,6 @@ import (
 	"github.com/liuyongshuai/thingo/context"
 	"github.com/liuyongshuai/thingo/controller"
 	"github.com/liuyongshuai/thingo/router"
-	"github.com/liuyongshuai/thingo/template"
 	"net/http"
 	"reflect"
 	"sync"
@@ -28,7 +27,7 @@ type ThingoHandler struct {
 	Router        *router.ThingoRouterList             //路由列表
 	RecoverFunc   RecoverFunc                          //panic后的处理函数
 	pool          sync.Pool                            //context上下文池
-	Tpl           *template.TplBuilder                 //模板对象类型
+	Tpl           *controller.TplBuilder               //模板对象类型
 	TplExt        string                               //模板的扩展后缀，默认“tpl”
 	TplDir        string                               //模板的根目录，默认“./tpl/”
 	TplCommonData map[interface{}]interface{}          //模板的公共参数
@@ -41,7 +40,7 @@ func NewThingoHandler() *ThingoHandler {
 	cr := &ThingoHandler{
 		Hooks:         make(map[int][]HooksFunc),
 		MaxMemory:     64 << 20,
-		Tpl:           template.NewTplBuilder(),
+		Tpl:           controller.NewTplBuilder(),
 		TplExt:        "tpl",
 		TplDir:        "./tpl",
 		Router:        router.NewThingoRouterList(),
